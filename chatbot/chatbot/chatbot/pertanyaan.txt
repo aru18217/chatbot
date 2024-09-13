@@ -1,0 +1,18 @@
+latar belakang :
+- forum diskusi online untuk membantu mewadahi masyarakat dalam berdiskusi, 
+berbagi pengalaman  dengan  komunitas,  sarana  belajar, bertukar 
+pikiran dan tanya jawab dengan lebih nyaman, profesional dan lebih terbuka
+- belum adanya forum diskusi online khusus mahasiswa ulbi
+- 
+
+chatbot :
+- info kehilangan barang di kampus (beres)
+- info magang (beres)
+- info administrasi, pembayaran, pendaftaran(beres)
+- info acara/event mendatang kampus (beres)
+- info rekruitmen jarkoman organisasi (beres)
+- info lomba kampus (beres)
+- info prodi/jurusan (beres)
+- info dosen(beres)
+- info permasalahan seputar akademik (baak bauk) (beres)
+- info pribadi

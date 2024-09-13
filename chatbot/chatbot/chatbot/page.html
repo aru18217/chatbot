@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sawala Bot</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+
+        #chat-container {
+            width: 600px; /* Sesuaikan dengan lebar yang diinginkan */
+            height: 550px; /* Sesuaikan dengan tinggi yang diinginkan */
+            border: 1px solid #ffffff;
+            background-color: #ffffff;
+            transform: scale(0);
+            transition: transform 0.3s ease-in-out;
+            display: none;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(78, 78, 78, 0.1);
+            position: relative; /* Tambahkan posisi relatif untuk menempatkan elemen header */
+        }
+
+        #chat-header {
+            background-color: #3d88cf;
+            color: #fff;
+            padding: 8px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        #header-container {
+            background-color: #3d88cf;
+            color: #fff;
+            padding: 8px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: 0; /* Sesuaikan dengan jarak dari bagian atas yang diinginkan */
+            left: 0;
+            right: 0;
+            z-index: 1; /* Menempatkan header di atas elemen lainnya */
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-top: 1px solid #e6e6e6;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: #fff;
+            z-index: 2;
+        }
+
+        #user-message {
+            flex-grow: 1;
+            margin-right: 8px;
+            padding: 8px;
+            border: 1px solid #329eb1;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        #send-button {
+            padding: 8px 12px;
+            background-color: #3d88cf;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 4px; /* Tambahkan margin kiri */
+        }
+
+        #send-button:hover {
+            background-color: #3d88cf;
+        }
+
+        #chat-messages {
+            padding: 20px;
+            overflow-y: scroll;
+            max-height: calc(100% - 120px);
+        }
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: left;
+            width: 100%;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            max-width: 70%;
+            text-align: left;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #d8d8d8;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #3d88cf;
+            color: #fff;
+            text-align: left;
+        }
+
+        .message-container.user {
+            align-items: flex-end;
+            text-align: right;
+        }
+        
+        .message-container.bot {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .message-input {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-top: 1px solid #e6e6e6;
+            background-color: #fff;
+            z-index: 2;
+            width: 600px;
+            margin-right: 10px;
+        }
+
+        .user-message-input {
+            flex-grow: 1;
+            margin-right: 4px;
+            padding: 8px;
+            border: 1px solid #c9e1e6;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .send-button {
+            padding: 8px 15px;
+            background-color: #3d88cf;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 4px; /* Tambahkan margin kiri */
+        }
+        
+        .send-button:hover {
+            background-color: #3d88cf;
+        }
+        
+        #header-container img {
+            width: 30px; /* Sesuaikan dengan lebar yang diinginkan */
+            height: 30px; /* Sesuaikan dengan tinggi yang diinginkan */
+            border-radius: 50%; /* Membuat gambar menjadi lingkaran */
+            margin-right: 10px;
+        }
+
+        #toggle-chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: #3d88cf;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #toggle-chat-button:hover {
+            background-color: #3d88cf;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="header-container">
+            <!-- Konten header -->
+        </div>
+        <div id="chat-messages"></div>
+        <div class="input-container">
+            <div class="message-input">
+                <input type="text" id="user-message" class="user-message-input" placeholder="Type your message...">
+            </div>
+            <button id="send-button" class="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Respons JSON dari backend
+        var responseJson = [
+            {
+                "response_type": "greeting",
+                "user_input": ["hello", "hi", "hey", "oi", "halo", "hallo", "olaa", "hai", "hei"],
+                "bot_response": "Halo Sobat Sawala! Ada yang bisa dibantu?",
+                "required_words": []
+            },
+            {
+                "response_type": "question",
+                "user_input": ["tanya", "bertanya", "mau", "ingin", "saya", "aku"],
+                "bot_response": "Boleh! Silahkan ajukan pertanyaan.",
+                "required_words": []
+            },
+            {
+                "response_type": "question",
+                "user_input": ["apa", "itu", "kenapa", "harus", "sawala"],
+                "bot_response": "Sawala adalah platform diskusi online yang dikhususkan untuk mahasiswa ULBI agar dapat mendapatkan informasi dan menyalurkan pertanyaan seputar perkuliahan yang bersifat publik.",
+                "required_words": []
+            },
+            {
+                "response_type": "question",
+                "user_input": ["bagaimana", "cara", "login", "register", "bertanya", "melihat", "pertanyaan", "menjadi", "sobat", "sawala", "bergabung"],
+                "bot_response": "Anda bisa memulai dengan Tekan nav MyAccount, lalu pilih register, isi form registrasi, lalu submit. Jika registrasi berhasil, Anda akan diarahkan ke halaman login. Isi username dan password, kemudian submit. Voila! Anda sudah menjadi sahabat Sawala.",
+                "required_words": []
+            },
+            {
+                "response_type": "question",
+                "user_input": ["ada", "sawala", "saja", "apa", "isi"],
+                "bot_response": "Sobat Salawa, tentunya kamu akan menemukan diskusi antar mahasiswa, ada berita terupdate seputar kuliah, info event yang akan diselenggarakan, dan yang pasti semuanya tentang kehidupan perkuliahan.",
+                "required_words": []
+            },
+            {
+                "response_type": "question",
+                "user_input": ["aturan", "apa", "saja", "seperti", "peraturan", "bagaimana", "untuk", "di", "sobat", "sawala", "bentuk"],
+                "bot_response": "Kamu bisa membaca ketentuannya di halaman Landing Page pada Aturan menjadi Sobat Sawala!",
+                "required_words": []
+            },
+            {
+                "response_type": "question",
+                "user_input": ["bagaimana", "mengajukan", "cara", "bertanya", "setelah", "di", "halaman", "memiliki", "akun", "sobat", "sawala", "login", "melakukan", "bergabung", "setelah", "pertanyaan"],
+                "bot_response": "Hal yang perlu kamu lakukan adalah klik button + pada Home, lalu isi form yang tersedia dan submit.",
+                "required_words": []
+            },
+            {
+                "response_type": "thank",
+                "user_input": ["terima kasih", "thanks", "makasih"],
+                "bot_response": "Sama-sama Sobat Sawala! Senang bisa membantu!",
+                "required_words": []
+            }
+        ];
+
+        function toggleChat() {
+            var chatContainer = document.getElementById("chat-container");
+            if (chatContainer.style.display === "none" || chatContainer.style.transform === "scale(0)") {
+                chatContainer.style.display = "block";
+                setTimeout(function() {
+                    chatContainer.style.transform = "scale(1)";
+                }, 0);
+            } else {
+                chatContainer.style.transform = "scale(0)";
+                setTimeout(function() {
+                    chatContainer.style.display = "none";
+                }, 300);
+            }
+        }
+
+        function sendMessage() {
+            var userMessageElement = document.getElementById("user-message");
+            var userMessage = userMessageElement.value.trim();
+            if (userMessage === "") return;
+
+            var chatMessagesElement = document.getElementById("chat-messages");
+
+            // Menampilkan pesan pengguna
+            var userMessageContainer = document.createElement("div");
+            userMessageContainer.classList.add("message-container", "user");
+            var userMessageDiv = document.createElement("div");
+            userMessageDiv.classList.add("message", "user-message");
+            userMessageDiv.innerText = userMessage;
+            userMessageContainer.appendChild(userMessageDiv);
+            chatMessagesElement.appendChild(userMessageContainer);
+
+            // Menemukan respons bot berdasarkan input pengguna
+            var botResponse = "Maaf, saya tidak mengerti. Bisa Anda jelaskan lebih lanjut?";
+            for (var i = 0; i < responseJson.length; i++) {
+                var response = responseJson[i];
+                var userInputMatches = response.user_input.some(input => userMessage.toLowerCase().includes(input.toLowerCase()));
+                var requiredWordsMatches = response.required_words.every(word => userMessage.toLowerCase().includes(word.toLowerCase()));
+
+                if (userInputMatches && requiredWordsMatches) {
+                    botResponse = response.bot_response;
+                    break;
+                }
+            }
+
+            // Menampilkan respons bot
+            var botMessageContainer = document.createElement("div");
+            botMessageContainer.classList.add("message-container", "bot");
+            var botMessageDiv = document.createElement("div");
+            botMessageDiv.classList.add("message", "bot-message");
+            botMessageDiv.innerText = botResponse;
+            botMessageContainer.appendChild(botMessageDiv);
+            chatMessagesElement.appendChild(botMessageContainer);
+
+            // Mengosongkan input pengguna
+            userMessageElement.value = "";
+
+            // Menggulir ke bawah untuk melihat pesan terbaru
+            chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+        }
+
+        // Menambahkan event listener untuk mendeteksi tombol Enter
+        document.getElementById("user-message").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+
+    <button id="toggle-chat-button" onclick="toggleChat()">Chat</button>
+</body>
+</html>
